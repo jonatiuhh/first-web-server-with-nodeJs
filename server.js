@@ -21,23 +21,23 @@ const serveFile = async (filePath, contentType, response) => {
     ? JSON.parse(rawData) : rawData;
     response.writeHead(
       filePath.includes('404.html') ? 404 : 200,
-       {'Content-Type': contentType}
+       { 'Content-Type': contentType }
        ); 
     response.end(
       contentType === 'application/json' ? JSON.stringify(data) : data
     );
   }catch (err) {
     console.log(err);
-    myEmitter.emit('log', `${err.name}: ${err.message}`, 'reqLog.txt');
+    myEmitter.emit('log', `${err.name}: ${err.message}`, 'errLog.txt');
     response.statusCode = 500;
     response.end();
 
   }
 }
- 
+
 const server = http.createServer((req, res) => {
   console.log(req.url, req.method);
-  myEmitter.emit('log', `${req.url}\t${res.method}`, 'errLog.txt');
+  myEmitter.emit('log', `${req.url}\t${res.method}`, 'reqLog.txt');
 
   const extension = path.extname(req.url);
 
@@ -51,9 +51,12 @@ const server = http.createServer((req, res) => {
       contentType = 'text/javascript';
       break;
     case '.json':
-      contentType = 'aplication/json';
+      contentType = 'application/json';
       break;
     case '.png':
+      contentType = 'image/png';
+      break;
+    case '.jpg':
       contentType = 'image/jpeg';
       break;
     case '.txt':
@@ -63,11 +66,11 @@ const server = http.createServer((req, res) => {
       contentType = 'text/html';
   }
 
-  let filePath = 
+  let filePath =
     contentType === 'text/html' && req.url === '/'
       ? path.join(__dirname, 'views', 'index.html')
       : contentType === 'text/html' && req.url.slice(-1) === '/'
-          ? path.join(__dirname, 'views', req.url, 'idnex.html')
+          ? path.join(__dirname, 'views', req.url, 'index.html')
           : contentType === "text/html"
               ? path.join(__dirname, 'views', req.url)
               : path.join(__dirname, req.url);
